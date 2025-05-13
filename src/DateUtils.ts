@@ -1,9 +1,11 @@
-const isOnDayOfWeek = (name: 'saturday' | 'sunday', date: Date): boolean => {
-  if (name === 'saturday') {
+import { DayOfWeek } from './types/DayOfWeek.ts';
+
+const isOnDayOfWeek = (name: DayOfWeek, date: Date): boolean => {
+  if (name === DayOfWeek.SATURDAY) {
     return date.getDay() === 6;
   }
 
-  if (name === 'sunday') {
+  if (name === DayOfWeek.SUNDAY) {
     return date.getDay() === 0;
   }
 

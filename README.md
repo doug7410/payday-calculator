@@ -45,7 +45,7 @@ Returns a `Date` object representing the calculated due date that meets the foll
 - Not falling on a holiday (adjusted backward)
 - Adjusted for direct deposit status
 
-####3 Business Rules
+#### Business Rules
 
 1. **Direct Deposit Handling:**
     - If the customer does not have direct deposit, add 1 day to the initial due date

@@ -1,5 +1,6 @@
 import { describe } from '@jest/globals';
-import { PayDateCalculator } from '../Calculator.js';
+import { PayDateCalculator } from '../Calculator.ts';
+import { PaySpan } from '../types/PaySpan.ts';
 
 describe('Calculator', () => {
   const newYearsDay = new Date('2025-01-01 EST');
@@ -13,7 +14,7 @@ describe('Calculator', () => {
 
   it('should return a date object', () => {
     const fundDate = new Date();
-    const paySpan = 'weekly';
+    const paySpan = PaySpan.WEEKLY;
     const payDay = new Date();
     const hasDirectDeposit = false;
     const dueDate = calculator.calculateDueDate(
@@ -34,7 +35,7 @@ describe('Calculator', () => {
         it('is at least 10 days after fund day', () => {
           let expectedPayDate = hasDirectDeposit ? '2025-01-30' : '2025-01-31';
           const fundDate = new Date('2025-01-15 EST');
-          const paySpan = 'weekly';
+          const paySpan = PaySpan.WEEKLY;
           const payDay = new Date('2025-01-30 EST');
           const dueDate = calculator.calculateDueDate(
             fundDate,
@@ -50,7 +51,7 @@ describe('Calculator', () => {
           it('weekly pay span', () => {
             const expectedPayDate = hasDirectDeposit ? '2025-01-31' : '2025-02-03';
             const fundDate = new Date('2025-01-20 EST');
-            const paySpan = 'weekly';
+            const paySpan = PaySpan.WEEKLY;
             const payDay = new Date('2025-1-24 EST');
             const dueDate = calculator.calculateDueDate(
               fundDate,
@@ -64,7 +65,7 @@ describe('Calculator', () => {
           it('bi-weekly pay span', () => {
             const expectedPayDate = hasDirectDeposit ? '2025-02-07' : '2025-02-10';
             const fundDate = new Date('2025-01-20 EST');
-            const paySpan = 'bi-weekly';
+            const paySpan = PaySpan.BI_WEEKLY;
             const payDay = new Date('2025-1-24 EST');
             const dueDate = calculator.calculateDueDate(
               fundDate,
@@ -78,7 +79,7 @@ describe('Calculator', () => {
           it('monthly pay span', () => {
             const expectedPayDate = hasDirectDeposit ? '2025-02-24' : '2025-02-25';
             const fundDate = new Date('2025-01-20 EST');
-            const paySpan = 'monthly';
+            const paySpan = PaySpan.MONTHLY;
             const payDay = new Date('2025-1-24 EST');
 
             const dueDate = calculator.calculateDueDate(
@@ -96,7 +97,7 @@ describe('Calculator', () => {
         it('previous day is not on a weekend', () => {
           const expectedPayDate = hasDirectDeposit ? '2025-07-03' : '2025-07-07';
           const fundDate = new Date('2025-01-15 EST');
-          const paySpan = 'weekly';
+          const paySpan = PaySpan.WEEKLY;
           const payDay = new Date(independenceDay);
 
           const dueDate = calculator.calculateDueDate(
@@ -112,7 +113,7 @@ describe('Calculator', () => {
         it('previous day is on a weekend', () => {
           const expectedPayDate = hasDirectDeposit ? '2025-05-23' : '2025-05-27';
           const fundDate = new Date('2025-01-01 EST');
-          const paySpan = 'weekly';
+          const paySpan = PaySpan.WEEKLY;
           const payDay = new Date(memorialDay);
           const dueDate = calculator.calculateDueDate(
             fundDate,
@@ -129,7 +130,7 @@ describe('Calculator', () => {
       it('adds two days when Saturday', () => {
         const expectedPayDate = '2025-05-19';
         const fundDate = new Date('2025-01-15 EST');
-        const paySpan = 'weekly';
+        const paySpan = PaySpan.WEEKLY;
         const payDay = new Date('2025-05-17 EST');
 
         const dueDate = calculator.calculateDueDate(
@@ -144,7 +145,7 @@ describe('Calculator', () => {
       it('adds one day when Sunday', () => {
         const expectedPayDate = '2025-05-19';
         const fundDate = new Date('2025-01-15 EST');
-        const paySpan = 'weekly';
+        const paySpan = PaySpan.WEEKLY;
         const payDay = new Date('2025-05-18 EST');
         const dueDate = calculator.calculateDueDate(
           fundDate,
@@ -158,7 +159,7 @@ describe('Calculator', () => {
       it('goes back to the first non holiday when due date is on the weekend and monday is a holiday', () => {
         const expectedPayDate = '2025-05-23';
         const fundDate = new Date('2025-01-15 EST');
-        const paySpan = 'weekly';
+        const paySpan = PaySpan.WEEKLY;
         const payDay = new Date('2025-05-24 EST');
 
         const dueDate = calculator.calculateDueDate(

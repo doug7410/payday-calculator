@@ -1,4 +1,6 @@
-import { dateListIncludes, isOnDayOfWeek } from './DateUtils.js';
+import { dateListIncludes, isOnDayOfWeek } from './DateUtils.ts';
+import { PayScheduleStrategyFactory } from './strategies/PayScheduleStrategyFactory.ts';
+import { PaySpan } from './types/PaySpan.ts';
 
 /**
  * This method determines the first available due date following the funding of a loan.
@@ -18,10 +20,12 @@ import { dateListIncludes, isOnDayOfWeek } from './DateUtils.js';
  * receives their paycheck via direct deposit.
  */
 class PayDateCalculator {
+  private readonly MIN_DAYS_AFTER_FUNDING = 10;
+
   public calculateDueDate(
     fundDay: Date,
     holidays: Date[],
-    paySpan: 'weekly' | 'bi-weekly' | 'monthly',
+    paySpan: PaySpan,
     payDay: Date,
     hasDirectDeposit: boolean,
   ): Date {
@@ -31,7 +35,9 @@ class PayDateCalculator {
       dueDate.setDate(dueDate.getDate() + 1);
     }
 
-    dueDate = this._adjustForRecentFundingDate(dueDate, fundDay, paySpan);
+    // Use strategy pattern to handle different pay schedules
+    const payScheduleStrategy = PayScheduleStrategyFactory.createStrategy(paySpan);
+    dueDate = payScheduleStrategy.adjustForMinimumDays(dueDate, fundDay, this.MIN_DAYS_AFTER_FUNDING);
 
     return this._adjustForHolidaysAndWeekends(
       fundDay,
@@ -45,7 +51,7 @@ class PayDateCalculator {
   private _adjustForHolidaysAndWeekends(
     fundDay: Date,
     holidays: Date[],
-    paySpan: 'weekly' | 'bi-weekly' | 'monthly',
+    paySpan: PaySpan,
     dueDate: Date,
     hasDirectDeposit: boolean,
   ): Date {
@@ -91,29 +97,6 @@ class PayDateCalculator {
     }
 
     return adjustedDate;
-  }
-
-  private _adjustForRecentFundingDate(
-    dueDate: Date,
-    fundDay: Date,
-    paySpan: 'weekly' | 'bi-weekly' | 'monthly',
-  ): Date {
-    const newDueDate = new Date(dueDate);
-    const daysSinceFundDay = Math.floor(
-      (newDueDate.getTime() - fundDay.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (daysSinceFundDay < 10) {
-      if (paySpan === 'weekly') {
-        newDueDate.setDate(newDueDate.getDate() + 7);
-      } else if (paySpan === 'bi-weekly') {
-        newDueDate.setDate(newDueDate.getDate() + 14);
-      } else {
-        newDueDate.setMonth(newDueDate.getMonth() + 1);
-      }
-    }
-
-    return newDueDate;
   }
 }
 

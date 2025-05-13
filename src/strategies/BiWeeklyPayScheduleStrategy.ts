@@ -1,0 +1,16 @@
+import { PayScheduleStrategy } from './PayScheduleStrategy.ts';
+import { getDaysDiff } from '../DateUtils.ts';
+
+export class BiWeeklyPayScheduleStrategy implements PayScheduleStrategy {
+  adjustForMinimumDays(dueDate: Date, fundDay: Date, minDays: number): Date {
+    const newDueDate = new Date(dueDate);
+    
+    if (getDaysDiff(newDueDate, fundDay) < minDays) {
+      newDueDate.setDate(newDueDate.getDate() + 14);
+    }
+    
+    return newDueDate;
+  }
+  
+
+}

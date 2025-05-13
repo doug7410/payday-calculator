@@ -1,14 +1,10 @@
-import { PayScheduleStrategy } from './PayScheduleStrategy.ts';
-import { getDaysDiff } from '../DateUtils.ts';
+import { BasePayScheduleStrategy } from './BasePayScheduleStrategy.ts';
 
-export class WeeklyPayScheduleStrategy implements PayScheduleStrategy {
-  adjustForMinimumDays(dueDate: Date, fundDay: Date, minDays: number): Date {
-    const newDueDate = new Date(dueDate);
-    
-    if (getDaysDiff(newDueDate, fundDay) < minDays) {
-      newDueDate.setDate(newDueDate.getDate() + 7);
-    }
-    
-    return newDueDate;
+export class WeeklyPayScheduleStrategy extends BasePayScheduleStrategy {
+
+  protected advanceToNextPaymentPeriod(date: Date): Date {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + 7);
+    return newDate;
   }
 }

@@ -1,11 +1,10 @@
-import { dateListIncludes, isOnDayOfWeek } from './DateUtils.ts';
 import { PayScheduleStrategyFactory } from './strategies/PayScheduleStrategyFactory.ts';
 import { PaySpan } from './types/PaySpan.ts';
-import { DayOfWeek } from './types/DayOfWeek.ts';
+import { DateAdjusterChain } from './adjusters/DateAdjusterChain.ts';
 
 /**
  * This method determines the first available due date following the funding of a loan.
- * The paydate will be at least 10 days in the future from the fundDay. The
+ * The pay date will be at least 10 days in the future from the fundDay. The
  * due date will fall on a day that is a pay date based on their pay date model
  * specified by 'paySpan' unless the date must be adjusted forward to miss a
  * weekend or backward to miss a holiday
@@ -40,64 +39,8 @@ class PayDateCalculator {
     const payScheduleStrategy = PayScheduleStrategyFactory.createStrategy(paySpan);
     dueDate = payScheduleStrategy.adjustForMinimumDays(dueDate, fundDay, this.MIN_DAYS_AFTER_FUNDING);
 
-    return this._adjustForHolidaysAndWeekends(
-      fundDay,
-      holidays,
-      paySpan,
-      dueDate,
-      hasDirectDeposit,
-    );
-  }
-
-  private _adjustForHolidaysAndWeekends(
-    fundDay: Date,
-    holidays: Date[],
-    paySpan: PaySpan,
-    dueDate: Date,
-    hasDirectDeposit: boolean,
-  ): Date {
-    const adjustedDate = new Date(dueDate);
-    if (dateListIncludes(holidays, dueDate)) {
-      adjustedDate.setDate(adjustedDate.getDate() - 1);
-
-      if (isOnDayOfWeek(DayOfWeek.SUNDAY, adjustedDate)) {
-        adjustedDate.setDate(adjustedDate.getDate() - 2);
-      } else if (isOnDayOfWeek(DayOfWeek.SATURDAY, adjustedDate)) {
-        adjustedDate.setDate(adjustedDate.getDate() - 1);
-      }
-
-      return this._adjustForHolidaysAndWeekends(
-        fundDay,
-        holidays,
-        paySpan,
-        adjustedDate,
-        hasDirectDeposit,
-      );
-    }
-
-    if (isOnDayOfWeek(DayOfWeek.SUNDAY, adjustedDate)) {
-      adjustedDate.setDate(adjustedDate.getDate() + 1);
-      return this._adjustForHolidaysAndWeekends(
-        fundDay,
-        holidays,
-        paySpan,
-        adjustedDate,
-        hasDirectDeposit,
-      );
-    }
-
-    if (isOnDayOfWeek(DayOfWeek.SATURDAY, adjustedDate)) {
-      adjustedDate.setDate(adjustedDate.getDate() + 2);
-      return this._adjustForHolidaysAndWeekends(
-        fundDay,
-        holidays,
-        paySpan,
-        adjustedDate,
-        hasDirectDeposit,
-      );
-    }
-
-    return adjustedDate;
+    // Use Chain of Responsibility to adjust for holidays and weekends
+    return DateAdjusterChain.adjustDate(dueDate, holidays);
   }
 }
 
